@@ -1,0 +1,9 @@
+.env
+.env.example
+.env.local
+.env.staging
+
+.modelo_algo_cosine
+__pycache__
+.pytest_cache
+._model.py

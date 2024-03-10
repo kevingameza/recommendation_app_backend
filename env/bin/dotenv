@@ -1,4 +1,4 @@
-#!/home/kevin/Desktop/Backend/env/bin/python3
+#!/home/kevin/Desktop/recommendation_app_backend/src/env/bin/python3.12
 # -*- coding: utf-8 -*-
 import re
 import sys
