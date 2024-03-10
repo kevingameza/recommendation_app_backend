@@ -6,5 +6,4 @@
 .modelo_algo_cosine
 __pycache__
 .pytest_cache
-# En tu archivo .gitignore
-src/modelo_algo_cosine.joblib
+
