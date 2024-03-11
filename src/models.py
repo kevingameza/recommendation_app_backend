@@ -1,10 +1,11 @@
 # SQLAlchemy models
-from sqlalchemy import Column, Integer, String, Float, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, List
 import enum
+from datetime import datetime
 
 Base = declarative_base()
 
@@ -15,7 +16,7 @@ class UserDB(Base):
     username = Column(String, unique=True)
     password = Column(String)
     recommendations = relationship('RecomendacionDB', back_populates='user')
-
+    interacciones = relationship('InteraccionDB', back_populates='user')
 
 class RecommendationStatus(enum.Enum):
     POSITIVE = "positive"
@@ -31,12 +32,33 @@ class RecomendacionDB(Base):
     est = Column(Float)
     details = Column(String)
     user_id = Column(Integer, ForeignKey('users.id'))
+    cancion_id = Column(Integer, ForeignKey('songs.id'))
 
     user = relationship('UserDB', back_populates='recommendations')
-    rating: Optional[str] = Field(default=None, example="positive", enum=["positive", "negative", None])
+    cancion = relationship('CancionDB', back_populates='recomendaciones')
+    rating = Column(String, default=None)
+class CancionDB(Base):
+    __tablename__ = 'songs'
+    id = Column(Integer, primary_key=True)
+    titulo = Column(String)
+    recomendaciones = relationship('RecomendacionDB', back_populates='cancion', )
+    interacciones = relationship('InteraccionDB', back_populates='cancion')
 
 
-class User(BaseModel):  # This is for FastAPI interaction, not for database
+class InteraccionDB(Base):
+    __tablename__ = 'interactions'
+
+    RecomendacionID = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id'))  # Ensure this is a foreign key
+    cancion_id = Column(Integer, ForeignKey('songs.id'))  # Ensure this is a foreign key
+    rating = Column(Float, nullable=True)
+
+    # Update these relationship lines
+    user = relationship('UserDB', back_populates='interacciones')
+    cancion = relationship('CancionDB', back_populates='interacciones')
+
+
+class User(BaseModel):
     username: str
     password: str
 
@@ -47,5 +69,26 @@ class Recomendacion(BaseModel):
     r_ui: float
     est: float
     details: dict
-    rating: Optional[str] = Field(default=None, example="positive", enum=["positive", "negative", None])
+    rating: Optional[str] = Field(default=None, enum=["positive", "negative", None])
 
+
+class CancionBase(BaseModel):
+    id: int
+    titulo: str
+
+class Cancion(CancionBase):
+    recomendaciones: List['Recomendacion'] = []
+
+class CancionCreate(BaseModel):
+    titulo: str
+
+
+class Interaccion(BaseModel):
+    user_id: int
+    cancion_id: int
+    rating: float
+
+class InteraccionCreate(BaseModel):
+    user_id: int
+    cancion_id: int
+    rating: float
