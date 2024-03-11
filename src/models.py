@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field
 from typing import Optional, List
 import enum
 from datetime import datetime
+from sqlalchemy.dialects.postgresql import VARCHAR  # Import specific to PostgreSQL
 
 Base = declarative_base()
 
@@ -13,8 +14,8 @@ class UserDB(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True)
-    username = Column(String, unique=True)
-    password = Column(String)
+    username = Column(String(50), unique=True)
+    password = Column(String(50))
     recommendations = relationship('RecomendacionDB', back_populates='user')
     interacciones = relationship('InteraccionDB', back_populates='user')
 
@@ -26,21 +27,21 @@ class RecommendationStatus(enum.Enum):
 class RecomendacionDB(Base):
     __tablename__ = "recommendations"
     id = Column(Integer, primary_key=True, index=True)
-    uid = Column(String)
-    iid = Column(String)
+    uid = Column(VARCHAR(50))
+    iid = Column(VARCHAR(50))
     r_ui = Column(Float)
     est = Column(Float)
-    details = Column(String)
+    details = Column(VARCHAR(50))
     user_id = Column(Integer, ForeignKey('users.id'))
     cancion_id = Column(Integer, ForeignKey('songs.id'))
 
     user = relationship('UserDB', back_populates='recommendations')
     cancion = relationship('CancionDB', back_populates='recomendaciones')
-    rating = Column(String, default=None)
+    rating = Column(Float, default=None)
 class CancionDB(Base):
     __tablename__ = 'songs'
     id = Column(Integer, primary_key=True)
-    titulo = Column(String)
+    titulo = Column(VARCHAR(400))
     recomendaciones = relationship('RecomendacionDB', back_populates='cancion', )
     interacciones = relationship('InteraccionDB', back_populates='cancion')
 
